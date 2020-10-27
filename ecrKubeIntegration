@@ -1,0 +1,51 @@
+#creating secret for kubernetes to pull images from ECR registry
+
+kubectl create secret docker-registry ecrreg --docker-server=<aws_account_id>.dkr.ecr.us-east-2.amazonaws.com --docker-username=AWS --docker-password=eyJwYXlsb2FkIjoiRlNpQ3ZnNWJEbCtqb0JuT1p5VzQrWE02cURzdXJOWnVzUU9nbVk3anVuVWxQUWVYckRUMTFldlZ3YWdBc3MrbENDM2pCR1libnByMERERENRMWtKQm5pTGZzeGtQSExKNGt1WThzL003QkMvVmJZZXlhWkJuWktyT3Y4dTBLbUxkWjFXL0MwdkgwUU1zSXgvZ2NzZHNmVFVGMXlKQjk4cnJNc0UrQkVxWGlXZWdCNUFBS0lCK2VRazl1Wi81UjFWL05lenlkaWVIZVcxUzdVTDU3ZXVrYXMrdnRDaGVvQk9ZeVBTWE9Oc0Q2dll5U3VjTUxqUGRFTlYrVXlUdHpzN0ZuUEZ2UDcwVnpUSlJ2dG80cmo1NlRFV1BhVzRRbHRkZlNSQ0xVK2ZyY1NIcVZlQ0NRRG5Db2tXeHBvSmJFYXVCTmtaL3Z5VE10V2M2TUtMaG5qazQ0SWhKcXNCeTQzZWJjTEhEOTAwNU8xQWRpWEU4WDJvYWJLMHBYWG1FZEw1RkF1SGJRcWorWEZJV2tqcWw4cC9pbkhPc2RXanpmaytXbmdkV2FwYlZIbnZlcWFZbU5IM29hNFZwUEFVWTllaWJaL3o5RE04N3hUL3hGTVVUWms2aHBqejlTZ2cxL2xJOTZSb2l0OTNNczdxM3pRTXo4VzNRZERGWmtyd1FlTExRbEc0QUJndVBCSmpreG5yalVQNlZZWTlZWSsyZHUxMExrK2k0clVUZFlZY2JYTmVzZUc4SmJRVGtLUW9WMEh1SEhCTzZsVmxVNWpiZ3RuT20rbXFRUzVpN3h1VG1yWThBRzdmTGFibnZpdGlwMlZDdlN3UGM4QVpxVnBBN0VlT2xIUlJTSkJtcUtFSVZvdDRGZjUxaWd1RXFUK0N4bCttVzVxV3Iya3ZjT2dZUTBtakRaZzJjMDBQblpXLzNiT1NPMTBKbmZScDkvc25WQjljSzlQbXZvRjdDZnhtUlEzenliVVlNZWhtSVNQOUFWMkJYZDJMVk9yRFdxalJpaWo5clUzckMrd0dvd3ozazRtSnNzc1cwc1RUNjJMUlRJMmRKUDJ5ZnpXQmRoNjJGRkxFSkZyT0xTcEYyUzJrQUJlL0QvditDVTZwQ0hnQTNDL2JabXZOcEpqYTBGRWhpaU83Z0IveWZMZC9PWXQyMCtxTG10UTFlM3h6MTMrcDhINHB1RHRLREFkdFhPTnNvSVBtNDhtbHdMWldDQVhrSUhVaGcrajEwcmtwNWZKcWM2U2dIS25sT2xXSWV1ci9uSEZkeXVKMnVVSDVOc0Iwc2FEUXVMbWhHV0Z5Zzg5LzlWa2ZpOEFjbjVCT2hzZXB1bnUzanIyMUFxS3M0T3QrZHJCZ2tiKzdqenZwT0lKZW1RazQySlhJS0VUTDhmSklXTnFJVEVoSmZOVFgxNUVhWFFXbnQwVmdib2szNE4vZTlWaHI0dHc0WXQ5aWdrdmYxQkE1a3ZJVWsrekFzQWdHQ2ZqajlTbGJoUExZVEU0RXU3L1FWV200V0JFVk8rNDZBWHhRZWwvSGIvcUxLNE1uaWl3OURJQk9qenI2cE5zU3ZLUUNOT0dFL0ZWQyIsImRhdGFrZXkiOiJBUUVCQJQTdZbW1TQzZ0ZlhQRXRJMEdvVDgzN2hFTHBSOFpmdUpmSkU0RW1uMUpOMDRmb3hTUDJzQ3RGMGVNWXV2SzdHNzFxK2Q2djRNS3QxazRDM1kwPSIsInZlcnNpb24iOiIyIiwidHlwZSI6IkRBVEFfS0VZIiwiZXhwaXJhdGlvbiI6MTU5ODQxNDEzNX0= 
+
+
+
+
+#run this command to get above password key
+aws ecr get-login --region=us-east-2
+
+
+
+#login to ECR
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com
+
+docker build -t flskrepo .
+
+docker tag flskrepo:latest <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/flskrepo:latest
+
+docker push <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/flskrepo:latest
+
+kubectl create deployment flskdocker --image=<aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/flskrepo:latest --dry-run=client -o yaml > flskdocker.yaml
+
+#resulting yaml should look like this:
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: flskdocker
+  name: flskdocker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flskdocker
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: flskdocker
+    spec:
+      imagePullSecrets:
+      - name: ecrreg
+      containers:
+      - image: <aws_account_id>.dkr.ecr.us-east-1.amazonaws.com/flskrepo:latest
+        imagePullPolicy: Always
+        name: flskrepo
+        resources: {}
+status: {}
