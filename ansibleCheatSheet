@@ -1,0 +1,84 @@
+List of Concepts:
+------------------
+
+Ansible Playbooks
+Ansible Facts
+modules
+handlers
+
+Advantages:
+------------
+FREE
+automation of repetitive tasks
+remotely perform all tasks/deployments
+reuse single/easy config (YAML) file (no scripts)
+agentless - no need to install agents on target machines, just need ssh access
+no deployment effort in beginning, no upgrade effort later
+reproduces apps (automates deployment & startup) containerised/non-containerised across servers/envs. (especially useful for non-microservices/monoliths)
+
+Ansible Installation:
+----------------------
+install "epel-release" repository
+install ansible (sudo yum install ansible)
+
+/etc/ansible/ansible.cfg -> ansible config file
+
+"/etc/ansible/hosts" or "ansible -i" or "ansible.cfg" can be edited to set inventory (host servers)
+
+sudo visudo (edits /etc/sudoers) - needed to give ansible user root like priveleges to run any command across target hosts, without pwd for automation
+
+
+use "ssh-keygen" and "ssh-copy-id" to create and add certificates for "ansible" user to enable logging in to hosts without password
+
+Ansible Commands:
+-----------------
+docs.ansible.com - for documentation and list of modules
+
+ansible-doc - command for ansible help
+
+ansible-doc -l  (lists installed modules)
+
+ansible-doc -s lineinfile   (-s for condensed version)
+
+ansible-doc <module_name> (for module details and usage examples)
+
+
+ansible <localhost/host> -m setup -> gathers all info about localhost/target hosts called "ansible facts" which can be used while running scripts(playbooks)
+
+tasks + host + user = play. playbook is made up of multiple plays
+
+**ansible ad-hoc commands are like bash commands and playbooks are like shell-scripts
+
+ansible <host> -m ping
+
+ansible <host> -b -m yum -a "name=httpd state=latest" -> -b tells ansible to run as root. all args are given after -a
+
+ansible <host> -b -m service -a "name=httpd name=started"
+
+above 2 commands install and start httpd. service module is used to start daemons after installation
+
+"ansible-playbook" command is used to execute ansible playbooks. (playbooks are written in YAML)
+
+ex: ansible-playbook -i inv test.yml   (-i inv is the inventory file ie host list)
+
+use "--check" flag for dry runs so that commands are not executed actually but you can get a feel of the output
+
+"playbook-name.retry" retry files are created for each host where ansible fails
+
+you can later run ansible against these files with --limit flag
+
+"vars:" used in playbook to define variables. "{{ var_name}}" is then used to substitute it. you can also use "-e" flag from command line.
+
+ex: ansible -i inv pbook.yml -e "target_service=httpd"
+
+"setup" module is used to collect "ansible facts"
+ex: ansible localhost -m setup
+ex: ansible localhost -m setup -a filter =*ipv4*   here the filter command is used to grep relevant fields from resultset
+
+ansible facts are gathered by default when playbooks are run
+
+add "gather_facts: no" to playbook to disable gathering facts by default
+
+"debug" module is useful to print info about inprogress plays
+
+"register" module is used to store task output
