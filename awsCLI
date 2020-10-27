@@ -1,0 +1,5 @@
+#sync files between local and s3 without overwrite (resume copy)
+aws s3 sync . s3://bucket/s3folder/ --exclude '*' --include '*.mkv'
+
+#copy based on file extension
+aws s3 cp . s3://bucket/s3folder/ --recursive --exclude "*" --include "*.mkv"
