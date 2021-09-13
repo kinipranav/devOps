@@ -1,0 +1,26 @@
+ kubectl create secret docker-registry regcred2 --docker-server=https://index.docker.io/v1/ --docker-username=kinipranav --docker-password=abcdefg --docker-email=pranav.kini@gmail.com
+ 
+ kubectl get secret regcred2 -o=jsonpath'={.data.\.dockerconfigjson}' | base64 -d
+ 
+ //create pod to consume above secret
+
+
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: dockerflask
+  name: dockerflask
+spec:
+  containers:
+  - image: kinipranav/flsk:release1
+    name: dockerflask
+    resources: {}
+  imagePullSecrets:
+  - name: regcred2
+status: {}
+
+
+//create service to expose above pod
+kubectl expose pod dockerflask --type=LoadBalancer --port=7000
